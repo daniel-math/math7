@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מתמטיקה - כיתה ז'</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Rubik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Rubik', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between p-4 sm:p-6 selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header / Title -->
+    <header class="max-w-md mx-auto w-full text-center mt-4 mb-6 relative">
+        <div class="inline-flex items-center justify-center w-14 h-14 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-200 mb-3 text-2xl">
+            <i class="fa-solid fa-calculator"></i>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">מתמטיקה - כיתה ז'</h1>
+        <p class="text-slate-500 text-sm mt-1">לחצו על המשימה שלכם לתרגול:</p>
+
+        <!-- Subtle Edit Toggle for Teacher -->
+        <button onclick="toggleEditMode()" title="מצב מורה" class="absolute left-0 top-0 text-slate-400 hover:text-indigo-600 p-2 text-sm transition-colors">
+            <i class="fa-solid fa-pen-to-square" id="editIcon"></i>
+        </button>
+    </header>
+
+    <!-- Main Container: Max 3 Links -->
+    <main class="max-w-md mx-auto w-full space-y-4 my-auto">
+        <div id="cardsContainer" class="space-y-4">
+            <!-- Cards generated dynamically -->
+        </div>
+
+        <!-- Teacher Edit Panel (Hidden by default) -->
+        <div id="editModal" class="hidden bg-white border border-slate-200 rounded-2xl p-5 shadow-xl space-y-4 mt-6">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-indigo-600"></i> עריכת 3 הקישורים
+                </h3>
+                <button onclick="toggleEditMode()" class="text-xs text-slate-400 hover:text-slate-600">סגור ✖</button>
+            </div>
+
+            <!-- Inputs for 3 links -->
+            <div id="editForm" class="space-y-3">
+                <!-- Inputs injected dynamically -->
+            </div>
+
+            <button onclick="saveChanges()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all shadow-md">
+                שמור שינויים
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-md mx-auto w-full text-center text-slate-400 text-xs py-4">
+        <p>© גישה מהירה למשימות מתמטיקה</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Store default 3 links
+        const defaultLinks = [
+            { id: 0, title: "משימה 1: אלגברה", url: "https://www.geogebra.org" },
+            { id: 1, title: "משימה 2: גאומטריה", url: "https://www.geogebra.org" },
+            { id: 2, title: "משימה 3: משחק לימודי", url: "https://www.geogebra.org" }
+        ];
+
+        let links = [];
+
+        function init() {
+            const saved = localStorage.getItem('min_math_links_3');
+            if (saved) {
+                try {
+                    links = JSON.parse(saved);
+                } catch(e) {
+                    links = defaultLinks;
+                }
+            } else {
+                links = defaultLinks;
+            }
+            render();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('min_math_links_3', JSON.stringify(links));
+        }
+
+        function render() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = links.map((link, index) => `
+                <a href="${link.url}" target="_blank" rel="noopener noreferrer" 
+                   class="block bg-white hover:bg-indigo-600 group border border-slate-200 hover:border-indigo-600 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <span class="w-8 h-8 rounded-xl bg-indigo-50 group-hover:bg-indigo-500 text-indigo-600 group-hover:text-white flex items-center justify-center font-bold text-sm transition-colors">
+                                ${index + 1}
+                            </span>
+                            <span class="font-bold text-slate-800 group-hover:text-white text-base sm:text-lg transition-colors">
+                                ${link.title || 'משימה ללא שם'}
+                            </span>
+                        </div>
+                        <i class="fa-solid fa-arrow-left text-slate-400 group-hover:text-white transition-colors"></i>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function toggleEditMode() {
+            const modal = document.getElementById('editModal');
+            const isHidden = modal.classList.contains('hidden');
+            
+            if (isHidden) {
+                renderEditForm();
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function renderEditForm() {
+            const form = document.getElementById('editForm');
+            form.innerHTML = links.map((link, i) => `
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <span class="text-xs font-bold text-indigo-600">קישור ${i + 1}</span>
+                    <input type="text" id="title_${i}" value="${link.title}" placeholder="שם המשימה" class="w-full px-2.5 py-1.5 bg-white border rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 outline-none">
+                    <input type="url" id="url_${i}" value="${link.url}" placeholder="כתובת URL" class="w-full px-2.5 py-1.5 bg-white border rounded-lg text-xs dir-ltr text-left focus:ring-1 focus:ring-indigo-500 outline-none">
+                </div>
+            `).join('');
+        }
+
+        function saveChanges() {
+            links = links.map((link, i) => ({
+                id: i,
+                title: document.getElementById(`title_${i}`).value,
+                url: document.getElementById(`url_${i}`).value
+            }));
+
+            saveToStorage();
+            render();
+            toggleEditMode();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
